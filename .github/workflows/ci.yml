@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        if: hashFiles('**/*.py') != ''
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        if: hashFiles('**/*.js', '**/*.ts') != ''
+        with:
+          node-version: '20'
+      - uses: actions/setup-go@v5
+        if: hashFiles('main.go') != ''
+        with:
+          go-version: '1.21'
+      - uses: actions/setup-java@v4
+        if: hashFiles('TextStats.java', 'Main.kt', 'Main.scala') != ''
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: actions-rs/toolchain@v1
+        if: hashFiles('main.rs') != ''
+        with:
+          toolchain: stable
+          override: true
+      - name: Verify
+        run: bash scripts/verify.sh
